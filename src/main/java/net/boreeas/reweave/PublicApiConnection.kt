@@ -16,8 +16,8 @@
 
 package net.boreeas.reweave
 
+import com.github.bucket4j.Buckets
 import net.boreeas.reweave.data.*
-import org.isomorphism.util.TokenBuckets
 import java.io.Closeable
 import java.io.InputStreamReader
 import java.net.URLEncoder
@@ -48,10 +48,10 @@ open class PublicApiConnection
     : ShardboundServer(applicationId, host, apiVersion, environment), AutoCloseable, Closeable {
 
 
-    private val bucket = TokenBuckets.builder()
-            .withCapacity(100)
-            .withFixedIntervalRefillStrategy(1, 100, TimeUnit.MILLISECONDS)
+    var bucket = Buckets.withMillisTimePrecision()
+            .withLimitedBandwidth(100, TimeUnit.SECONDS, 1)
             .build()
+
     private val pool = Executors.newCachedThreadPool { target ->
         val thread = Thread(target, "AuthorizedApiConnection Worker Thread")
         thread.isDaemon = true

@@ -142,7 +142,7 @@ class AuthorizedApiConnection
         fun pendingInvites(): Future<List<Any>> {
             return submit {
                 val tgt = target.path("pending_invites/show")
-                val type = object : com.google.common.reflect.TypeToken<Map<String, List<Any>>>() {}.type
+                val type = object : com.google.gson.reflect.TypeToken<Map<String, List<Any>>>() {}.type
                 val obj = gson.fromJson<Map<String, List<Any>>>(open(tgt), type)
                 obj["invites"]!!
             }
@@ -185,7 +185,7 @@ class AuthorizedApiConnection
         fun retrieve(): Future<Map<String, Any>> {
             return submit {
                 val tgt = target.path("showall")
-                val type = object : com.google.common.reflect.TypeToken<Map<String, Any>>() {}.type
+                val type = object : com.google.gson.reflect.TypeToken<Map<String, Any>>() {}.type
                 gson.fromJson<Map<String, Any>>(open(tgt), type)
             }
         }
@@ -198,7 +198,7 @@ class AuthorizedApiConnection
             return submit {
                 val tgt = target.path("update")
                 val jsonStr = gson.toJson(changedValues)
-                val type = object : com.google.common.reflect.TypeToken<Map<String, Any>>() {}.type
+                val type = object : com.google.gson.reflect.TypeToken<Map<String, Any>>() {}.type
                 gson.fromJson<Map<String, Any>>(post(tgt, jsonStr), type)
             }
         }
@@ -227,7 +227,7 @@ class AuthorizedApiConnection
         fun showAll(): Future<List<String>> {
             return submit {
                 val tgt = target.path("showall")
-                val type = object : com.google.common.reflect.TypeToken<Map<String, List<String>>>() {}.type
+                val type = object : com.google.gson.reflect.TypeToken<Map<String, List<String>>>() {}.type
                 val obj = gson.fromJson<Map<String, List<String>>>(open(tgt), type)
                 obj["friends"]!!
             }
