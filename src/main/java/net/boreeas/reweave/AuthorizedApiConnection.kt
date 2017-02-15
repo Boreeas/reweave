@@ -93,9 +93,16 @@ class AuthorizedApiConnection
          * Retrieve private information about the logged in user
          */
         fun showPrivateInfo(): Future<User.PrivateData> {
+            return withPrivateInfo { it }
+        }
+
+        /**
+         * Apply a function to the private information about the logged in user
+         */
+        fun <T> withPrivateInfo(func: (User.PrivateData) -> T): Future<T> {
             return submit {
                 val tgt = target.path("show_private")
-                gson.fromJson(open(tgt), User.PrivateData::class.java)
+                func(gson.fromJson(open(tgt), User.PrivateData::class.java))
             }
         }
 
@@ -103,9 +110,16 @@ class AuthorizedApiConnection
          * Retrieve the welcome message shown when first logging in
          */
         fun getWelcome(): Future<WelcomeMessage> {
+            return withWelcomeMessage { it }
+        }
+
+        /**
+         * Apply a function to the welcome message shown when first logging in
+         */
+        fun <T> withWelcomeMessage(func: (WelcomeMessage) -> T): Future<T> {
             return submit {
                 val tgt = target.path("welcome")
-                gson.fromJson(open(tgt), WelcomeMessage::class.java)
+                func(gson.fromJson(open(tgt), WelcomeMessage::class.java))
             }
         }
     }
@@ -119,10 +133,19 @@ class AuthorizedApiConnection
          * @param includeMembers should a list of members included in the result?
          */
         fun retrieve(houseId: String, includeMembers: Boolean = false): Future<House> {
+            return withHouse(houseId, includeMembers) { it }
+        }
+
+        /**
+         * Apply a function to the house with the specified id
+         * @param houseId id of the house
+         * @param includeMembers should a list of members included in the result?
+         */
+        fun <T> withHouse(houseId: String, includeMembers: Boolean = false, func: (House) -> T): Future<T> {
             return submit {
                 var target = target.path("show/${enc(houseId)}")
                 if (includeMembers) target = target.queryParam("include_members")
-                gson.fromJson(open(target), House::class.java)
+                func(gson.fromJson(open(target), House::class.java))
             }
         }
 
@@ -130,9 +153,16 @@ class AuthorizedApiConnection
          * Retrieve display information about the specified house
          */
         fun showIsland(houseId: String): Future<House.Island> {
+            return withIsland(houseId) { it }
+        }
+
+        /**
+         * Apply a function to the display information about the specified house
+         */
+        fun <T> withIsland(houseId: String, func: (House.Island) -> T): Future<T> {
             return submit {
                 val target = target.path("show_island/${enc(houseId)}")
-                gson.fromJson(open(target), House.Island::class.java)
+                func(gson.fromJson(open(target), House.Island::class.java))
             }
         }
 
@@ -140,11 +170,18 @@ class AuthorizedApiConnection
          * Retrieve pending house invites for the current user
          */
         fun pendingInvites(): Future<List<Any>> {
+            return withPendingInvites { it }
+        }
+
+        /**
+         * Apply a function to the pending house invites for the current user
+         */
+        fun <T> withPendingInvites(func: (List<Any>) -> T): Future<T> {
             return submit {
                 val tgt = target.path("pending_invites/show")
                 val type = object : com.google.gson.reflect.TypeToken<Map<String, List<Any>>>() {}.type
                 val obj = gson.fromJson<Map<String, List<Any>>>(open(tgt), type)
-                obj["invites"]!!
+                func(obj["invites"]!!)
             }
         }
 
@@ -156,22 +193,36 @@ class AuthorizedApiConnection
         /**
          * Retrieve a list of normal shardfalls currently available to the logged in user
          */
-        fun showAll(): Future<Expeditions> {
+        fun normalExpeditions(): Future<Expeditions> {
+            return withNormalExpeditions { it }
+        }
+
+        /**
+         * Apply a function to the list of normal shardfalls currently available to the logged in user
+         */
+        fun <T> withNormalExpeditions(func: (Expeditions) -> T): Future<T> {
             return submit {
                 val target = target.path("showall")
-                gson.fromJson(open(target), Expeditions::class.java)
+                func(gson.fromJson(open(target), Expeditions::class.java))
             }
         }
 
         /**
          * Retrieve a list of twitch integration shardfalls currently available to the logged in user
          */
-        fun twitch(priorTwitchExpeditionList: List<String> = ArrayList()): Future<Expeditions> {
+        fun twitchExpeditions(priorTwitchExpeditionList: List<String> = ArrayList()): Future<Expeditions> {
+            return withTwitchExpeditions { it }
+        }
+
+        /**
+         * Apply a function to the list of twitch integration shardfalls currently available to the logged in user
+         */
+        fun <T> withTwitchExpeditions(priorTwitchExpeditionList: List<String> = ArrayList(), func: (Expeditions) -> T): Future<T> {
             return submit {
                 val tgt = target.path("show/twitch")
                 val map = HashMap<String, Any>()
                 map["prior_twitch_expedition_list"] = priorTwitchExpeditionList
-                gson.fromJson(post(tgt, gson.toJson(map)), Expeditions::class.java)
+                func(gson.fromJson(post(tgt, gson.toJson(map)), Expeditions::class.java))
             }
         }
     }
@@ -183,10 +234,17 @@ class AuthorizedApiConnection
          * Retrieve the current preferences of the user
          */
         fun retrieve(): Future<Map<String, Any>> {
+            return withPrefs { it }
+        }
+
+        /**
+         * Apply a function to the current preferences of the user
+         */
+        fun <T> withPrefs(func: (Map<String, Any>) -> T): Future<T> {
             return submit {
                 val tgt = target.path("showall")
                 val type = object : com.google.gson.reflect.TypeToken<Map<String, Any>>() {}.type
-                gson.fromJson<Map<String, Any>>(open(tgt), type)
+                func(gson.fromJson<Map<String, Any>>(open(tgt), type))
             }
         }
 
@@ -195,11 +253,19 @@ class AuthorizedApiConnection
          * @param changedValues A map containing the preferences that have been changed
          */
         fun update(changedValues: Map<String, Any>): Future<Map<String, Any>> {
+            return withUpdatedPrefs(changedValues) { it }
+        }
+
+        /**
+         * Update preferences and apply a function to the new set of preferences
+         * @param changedValues A map containing the preferences that have been changed
+         */
+        fun <T> withUpdatedPrefs(changedValues: Map<String, Any>, func: (Map<String, Any>) -> T): Future<T> {
             return submit {
                 val tgt = target.path("update")
                 val jsonStr = gson.toJson(changedValues)
                 val type = object : com.google.gson.reflect.TypeToken<Map<String, Any>>() {}.type
-                gson.fromJson<Map<String, Any>>(post(tgt, jsonStr), type)
+                func(gson.fromJson<Map<String, Any>>(post(tgt, jsonStr), type))
             }
         }
     }
@@ -211,9 +277,16 @@ class AuthorizedApiConnection
          * Retrieve connection information for the current messaging endpoint
          */
         fun getEndpoint(): Future<EndpointAddress> {
+            return withEndpoint { it }
+        }
+
+        /**
+         * Apply a function to connection information for the current messaging endpoint
+         */
+        fun <T> withEndpoint(func: (EndpointAddress) -> T): Future<T> {
             return submit {
                 val target = target.path("get_endpoint")
-                gson.fromJson(open(target), EndpointAddress::class.java)
+                func(gson.fromJson(open(target), EndpointAddress::class.java))
             }
         }
     }
@@ -225,11 +298,18 @@ class AuthorizedApiConnection
          * Retrieve a list of friends of the current user
          */
         fun showAll(): Future<List<String>> {
+            return withAll { it }
+        }
+
+        /**
+         * Apply a function to the list of friends of the current user
+         */
+        fun <T> withAll(func: (List<String>) -> T): Future<T> {
             return submit {
                 val tgt = target.path("showall")
                 val type = object : com.google.gson.reflect.TypeToken<Map<String, List<String>>>() {}.type
                 val obj = gson.fromJson<Map<String, List<String>>>(open(tgt), type)
-                obj["friends"]!!
+                func(obj["friends"]!!)
             }
         }
     }
@@ -240,9 +320,16 @@ class AuthorizedApiConnection
          * Retrieve a list of decks of the current user
          */
         fun showAll(): Future<DeckList> {
+            return withAll { it }
+        }
+
+        /**
+         * Apply a function to the list of decks of the current user
+         */
+        fun <T> withAll(func: (DeckList) -> T): Future<T> {
             return submit {
                 val tgt = target.path("showall")
-                gson.fromJson(open(tgt), DeckList::class.java)
+                func(gson.fromJson(open(tgt), DeckList::class.java))
             }
         }
     }
@@ -254,9 +341,16 @@ class AuthorizedApiConnection
          * Retrieve a list of maps currently in use
          */
         fun showAll(): Future<MapList> {
+            return withAll { it }
+        }
+
+        /**
+         * Apply a function to the list of maps currently in use
+         */
+        fun <T> withAll(func: (MapList) -> T): Future<T> {
             return submit {
                 val tgt = target.path("showall")
-                gson.fromJson(open(tgt), MapList::class.java)
+                func(gson.fromJson(open(tgt), MapList::class.java))
             }
         }
     }

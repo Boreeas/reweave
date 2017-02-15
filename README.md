@@ -7,7 +7,7 @@ access token. The access token can be retrieved via oauth, further information i
 Spiritwalk.
 
 Once you have these two bits of information, create a `PublicApiConnection`. Calls on this class are ratelimited
-to be nice to the shardbound servers (by default a rate of 100 requests/second). To implement
+to be nice to the shardbound servers (by default a rate of 10 requests/second with a 100 request burst). To implement
 this, the class has a backing thread pool. Remember to close this once you don't need to use it anymore (For this 
 purpose, PublicApiConnection is auto-closeable)
 

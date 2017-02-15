@@ -49,7 +49,7 @@ open class PublicApiConnection
 
 
     var bucket = Buckets.withMillisTimePrecision()
-            .withLimitedBandwidth(100, TimeUnit.SECONDS, 1)
+            .withLimitedBandwidth(100, TimeUnit.SECONDS, 10)
             .build()
 
     private val pool = Executors.newCachedThreadPool { target ->
@@ -112,9 +112,17 @@ open class PublicApiConnection
          * @param userId The id of the user
          */
         fun retrieve(userId: String): Future<User> {
+            return withUser(userId) { it }
+        }
+
+        /**
+         * Retrieve information about the specified user and apply a function to it
+         * @param userId The id of the user
+         */
+        fun <T> withUser(userId: String, func: (User) -> T): Future<T> {
             return submit {
                 val target = target.path("show/${enc(userId)}")
-                gson.fromJson(open(target), User::class.java)
+                func(gson.fromJson(open(target), User::class.java))
             }
         }
 
@@ -123,10 +131,18 @@ open class PublicApiConnection
          * @param userId The id of the user
          */
         fun getMatchHistory(userId: String): Future<List<Game>> {
+            return withMatchHistory(userId) { it }
+        }
+
+        /**
+         * Retrieve the match history of the specified user and apply a function to it
+         * @param userId The id of the user
+         */
+        fun <T> withMatchHistory(userId: String, func: (List<Game>) -> T): Future<T> {
             return submit {
                 val tgt = target.path("history/show/${enc(userId)}")
                 val obj = gson.fromJson(open(tgt), GameList::class.java)
-                obj.games
+                func(obj.games)
             }
         }
     }
@@ -139,9 +155,17 @@ open class PublicApiConnection
          * @param userId The id of the user
          */
         fun showAll(userId: String): Future<DeckList> {
+            return withAll(userId) { it }
+        }
+
+        /**
+         * Retrieve all decks used by the specified user and apply the specified function to them
+         * @param userId The id of the user
+         */
+        fun <T> withAll(userId: String, func: (DeckList) -> T): Future<T> {
             return submit {
                 val tgt = target.path("showall/${enc(userId)}")
-                gson.fromJson(open(tgt), DeckList::class.java)
+                func(gson.fromJson(open(tgt), DeckList::class.java))
             }
         }
     }
@@ -153,9 +177,16 @@ open class PublicApiConnection
          * Re-retrieve token information
          */
         fun verifyCredentials(): Future<LoginResult> {
+            return withCredentials { it }
+        }
+
+        /**
+         * Re-retrieve token information and apply the specified function to it
+         */
+        fun <T> withCredentials(func: (LoginResult) -> T): Future<T> {
             return submit {
                 val tgt = target.path("verify_credentials")
-                gson.fromJson(open(tgt), LoginResult::class.java)
+                func(gson.fromJson(open(tgt), LoginResult::class.java))
             }
         }
 
