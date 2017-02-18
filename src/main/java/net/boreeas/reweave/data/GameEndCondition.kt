@@ -24,7 +24,9 @@ enum class GameEndCondition(val code: Int) {
     LOSS(1),
     LOSS_CONCEDE(2),
     WIN_CONCEDE(3),
-    DRAW(4);
+    DRAW(4),
+    COOP_LOSS(5),
+    COOP_WIN(6);
 
     companion object {
         @JvmStatic
