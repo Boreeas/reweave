@@ -16,6 +16,10 @@
 
 package net.boreeas.reweave.data
 
+import com.google.gson.annotations.SerializedName
+import java.text.SimpleDateFormat
+import java.util.*
+
 /**
  * @author Malte Schütze
  */
@@ -24,5 +28,13 @@ data class Game(
         val gameId: String?,
         val opponentDisplayName: String?,
         val opponentId: String?,
-        val startDate: String?
-)
+        @SerializedName("start_date")
+        private val _startDate: String?
+) {
+    val startDate: Date?
+        get() = if (_startDate != null) DATE_FORMAT.parse(_startDate) else null
+
+    companion object {
+        val DATE_FORMAT = SimpleDateFormat("dd MMM yyyy HH:mm:ss")
+    }
+}
