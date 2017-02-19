@@ -17,8 +17,10 @@
 package net.boreeas.reweave.data
 
 import com.google.gson.annotations.SerializedName
-import java.text.SimpleDateFormat
-import java.util.*
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
 /**
  * @author Malte Schütze
@@ -31,10 +33,14 @@ data class Game(
         @SerializedName("start_date")
         private val _startDate: String?
 ) {
-    val startDate: Date?
-        get() = if (_startDate != null) DATE_FORMAT.parse(_startDate) else null
+    /**
+     * Retrieve the game start date as an Instant. Currently, time zone information is missing from the start date field
+     * of the api. In it's absence, UTC is assumed.
+     */
+    val startDate: Instant?
+        get() = if (_startDate != null) LocalDateTime.parse(_startDate, DATE_FORMAT).toInstant(ZoneOffset.UTC) else null
 
     companion object {
-        val DATE_FORMAT = SimpleDateFormat("dd MMM yyyy HH:mm:ss")
+        val DATE_FORMAT = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")
     }
 }
