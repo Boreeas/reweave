@@ -17,8 +17,8 @@
 package net.boreeas.reweave.data
 
 import com.google.gson.annotations.SerializedName
-import java.time.Instant
 import java.time.LocalDateTime
+import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
@@ -37,8 +37,8 @@ data class Game(
      * Retrieve the game start date as an Instant. Currently, time zone information is missing from the start date field
      * of the api. In it's absence, UTC is assumed.
      */
-    val startDate: Instant?
-        get() = if (_startDate != null) LocalDateTime.parse(_startDate, DATE_FORMAT).toInstant(ZoneOffset.UTC) else null
+    val startDate: OffsetDateTime?
+        get() = if (_startDate != null) OffsetDateTime.of(LocalDateTime.parse(_startDate, DATE_FORMAT), ZoneOffset.UTC) else null
 
     companion object {
         val DATE_FORMAT = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")
