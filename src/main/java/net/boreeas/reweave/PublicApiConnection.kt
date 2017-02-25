@@ -17,10 +17,10 @@
 package net.boreeas.reweave
 
 import com.github.bucket4j.Buckets
+import com.google.common.net.UrlEscapers
 import net.boreeas.reweave.data.*
 import java.io.Closeable
 import java.io.InputStreamReader
-import java.net.URLEncoder
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
@@ -58,7 +58,7 @@ open class PublicApiConnection
         thread
     }
 
-    internal fun enc(tgt: String): String = URLEncoder.encode(tgt, "UTF-8")
+    internal fun enc(tgt: String): String = UrlEscapers.urlFragmentEscaper().escape(tgt)
 
     override fun close() {
         pool.shutdownNow()
