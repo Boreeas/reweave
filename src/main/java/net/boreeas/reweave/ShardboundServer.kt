@@ -75,7 +75,11 @@ open class ShardboundServer
                 .acceptEncoding("gzip")
                 .get()
 
-        val stream = readBin(response)
+        val stream = try {
+            readBin(response)
+        } catch (ex: RequestException) {
+            throw RequestException(target.uri, ex.errorCode, ex.errorType)
+        }
         if (response.length == 0) {
             throw RuntimeException("No length for data reported")
         }
@@ -102,7 +106,12 @@ open class ShardboundServer
                 .post(Entity.entity("application_id=$applicationId&grant_type=password",
                         MediaType.APPLICATION_FORM_URLENCODED))
 
-        return gson.fromJson(read(response), LoginResult::class.java)
+        val stream = try {
+            read(response)
+        } catch (ex: RequestException) {
+            throw RequestException(target.uri, ex.errorCode, ex.errorType)
+        }
+        return gson.fromJson(stream, LoginResult::class.java)
     }
 
     /**
@@ -120,7 +129,11 @@ open class ShardboundServer
                 .acceptEncoding("gzip")
                 .get()
 
-        return read(response)
+        return try {
+            read(response)
+        } catch (ex: RequestException) {
+            throw RequestException(target.uri, ex.errorCode, ex.errorType)
+        }
     }
 
     internal fun read(response: Response): InputStreamReader {
@@ -129,7 +142,7 @@ open class ShardboundServer
 
     internal fun readBin(response: Response): InputStream {
         if (response.status != 200) {
-            throw RequestException(response.location, response.status)
+            throw RequestException(null, response.status)
         }
 
         val encoding: String? = response.getHeaderString("Content-Encoding")

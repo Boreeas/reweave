@@ -71,7 +71,11 @@ open class PublicApiConnection
                 .header("Authorization", "Bearer $accessToken")
                 .get()
 
-        return read(response)
+        return try {
+            read(response)
+        } catch (ex: RequestException) {
+            throw RequestException(target.uri, ex.errorCode, ex.errorType)
+        }
     }
 
     internal fun post(target: WebTarget, payload: String, mediaType: MediaType = MediaType.APPLICATION_JSON_TYPE): InputStreamReader {
@@ -81,7 +85,11 @@ open class PublicApiConnection
                 .header("Authorization", "Bearer $accessToken")
                 .post(Entity.entity(payload, mediaType))
 
-        return read(response)
+        return try {
+            read(response)
+        } catch (ex: RequestException) {
+            throw RequestException(target.uri, ex.errorCode, ex.errorType)
+        }
     }
 
     internal fun <T> submit(func: () -> T): Future<T> {
