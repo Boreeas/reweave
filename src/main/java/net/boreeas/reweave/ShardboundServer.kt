@@ -129,7 +129,7 @@ open class ShardboundServer
 
     internal fun readBin(response: Response): InputStream {
         if (response.status != 200) {
-            throw RequestException(response.status)
+            throw RequestException(response.location, response.status)
         }
 
         val encoding: String? = response.getHeaderString("Content-Encoding")

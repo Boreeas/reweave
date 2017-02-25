@@ -16,16 +16,20 @@
 
 package net.boreeas.reweave
 
+import java.net.URI
+
 /**
  * @author Malte Schütze
  */
 class RequestException : RuntimeException {
     val errorType: ErrorType
     val errorCode: Int
+    val targetUri: URI
 
-    @JvmOverloads constructor(responseCode: Int, error: ErrorType = ErrorType.getByCode(responseCode)) : super(responseCode.toString() + "/" + error + " error during request") {
+    @JvmOverloads constructor(targetUri: URI, responseCode: Int, error: ErrorType = ErrorType.getByCode(responseCode)) : super("$responseCode/$error error during request to $targetUri") {
         this.errorType = error
         this.errorCode = responseCode
+        this.targetUri = targetUri
     }
 
 
