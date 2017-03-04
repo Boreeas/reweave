@@ -21,6 +21,7 @@ import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
+import java.util.*
 
 /**
  * @author Malte Schütze
@@ -41,6 +42,6 @@ data class Game(
         get() = if (_startDate != null) OffsetDateTime.of(LocalDateTime.parse(_startDate, DATE_FORMAT), ZoneOffset.UTC) else null
 
     companion object {
-        val DATE_FORMAT = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")
+        val DATE_FORMAT = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss", Locale.US)
     }
 }
