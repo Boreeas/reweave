@@ -19,6 +19,7 @@ package net.boreeas.reweave
 import com.github.bucket4j.Buckets
 import com.google.common.net.UrlEscapers
 import net.boreeas.reweave.data.*
+import org.apache.cxf.interceptor.Fault
 import java.io.Closeable
 import java.io.InputStreamReader
 import java.util.concurrent.Executors
@@ -51,6 +52,8 @@ open class PublicApiConnection
     var bucket = Buckets.withMillisTimePrecision()
             .withLimitedBandwidth(100, TimeUnit.SECONDS, 10)
             .build()
+    var retryOnError = false
+    var retryTimeoutMs = 1000L
 
     private val pool = Executors.newCachedThreadPool { target ->
         val thread = Thread(target, "AuthorizedApiConnection Worker Thread")
@@ -94,8 +97,31 @@ open class PublicApiConnection
 
     internal fun <T> submit(func: () -> T): Future<T> {
         return pool.submit<T> {
-            bucket.consume(1)
-            func()
+            var result: T
+
+            while (true) {
+                try {
+                    bucket.consume(1)
+                    result = func()
+                    break
+                } catch (ex: RequestException) {
+                    if (retryOnError) {
+                        System.err.println("${ex.message}, retrying")
+                        Thread.sleep(retryTimeoutMs)
+                    } else {
+                        throw ex
+                    }
+                } catch (ex: Fault) {
+                    if (retryOnError) {
+                        System.err.println("${ex.message}, retrying")
+                        Thread.sleep(retryTimeoutMs)
+                    } else {
+                        throw ex
+                    }
+                }
+            }
+
+            result
         }
     }
 
