@@ -61,7 +61,7 @@ open class PublicApiConnection
         thread
     }
 
-    internal fun enc(tgt: String): String = UrlEscapers.urlFragmentEscaper().escape(tgt)
+    internal fun enc(tgt: String): String = UrlEscapers.urlFragmentEscaper().escape(tgt).replace(";", "%3B")
 
     override fun close() {
         pool.shutdownNow()
