@@ -23,7 +23,6 @@ import com.google.gson.reflect.TypeToken
 import net.boreeas.reweave.data.*
 import java.io.InputStream
 import java.io.InputStreamReader
-import java.util.*
 import java.util.zip.GZIPInputStream
 import javax.ws.rs.client.ClientBuilder
 import javax.ws.rs.client.Entity
@@ -40,7 +39,7 @@ import javax.ws.rs.core.Response
  */
 open class ShardboundServer
 @JvmOverloads constructor(
-        internal val applicationId: String = "F75909C6790EC382E03D0B5F78CF7D2607E9A997",
+        internal val applicationId: String = "21e217345069412b8d860251944489ae",
         internal val host: String = "st-george.spiritwalkgames.com",
         internal val apiVersion: Int = 1,
         internal val environment: String = "lkg"
@@ -94,16 +93,16 @@ open class ShardboundServer
      * @return the login result, containing user id and access token
      * @throws RequestException 401 Unauthorized if either username or password is incorrect
      */
-    fun login(username: String, password: String): LoginResult {
-        val target = defaultTarget.path("login")
-        val authBytes = "$username:$password".toByteArray(Charsets.UTF_8)
-        val base64 = Base64.getEncoder().encodeToString(authBytes)
+    fun login(steamTicket: String): LoginResult {
+        val target = defaultTarget.path("login/steam")
+        // val authBytes = "$username:$password".toByteArray(Charsets.UTF_8)
+        // val base64 = Base64.getEncoder().encodeToString(authBytes)
 
         val response = target.request()
                 .accept(MediaType.WILDCARD_TYPE)
                 .acceptEncoding("gzip")
-                .header("Authorization", "Basic $base64")
-                .post(Entity.entity("application_id=$applicationId&grant_type=password",
+                // .header("Authorization", "Basic $base64")
+                .post(Entity.entity("application_id=$applicationId&steam_ticket=$steamTicket",
                         MediaType.APPLICATION_FORM_URLENCODED))
 
         val stream = try {
@@ -118,8 +117,8 @@ open class ShardboundServer
      * Upgrade this connection to an authorized connection. Functionally equivalent to calling login() followed by
      * creating an AuthorizedApiConnection with the returned access token
      */
-    fun toAuthorizedConnection(username: String, password: String): AuthorizedApiConnection {
-        val loginResult = login(username, password)
+    fun toAuthorizedConnection(steamTicket: String): AuthorizedApiConnection {
+        val loginResult = login(steamTicket)
         return AuthorizedApiConnection(applicationId, host, apiVersion, environment, loginResult.accessToken!!)
     }
 

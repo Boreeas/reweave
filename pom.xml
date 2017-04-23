@@ -7,7 +7,7 @@
     <groupId>net.boreeas</groupId>
     <artifactId>reweave</artifactId>
     <name>net.boreeas:reweave</name>
-    <version>0.2.1-SNAPSHOT</version>
+    <version>0.3.0-SNAPSHOT</version>
     <description>A shardbound rest api client</description>
     <url>https://github.com/boreeas/reweave</url>
 
